@@ -21,23 +21,23 @@ const (
 	colorPurple = "\033[35m"
 )
 
-// Emojis and symbols
+// Symbols - using Nerd Font symbols and keeping tree emoji
 const (
-	treeSymbol      = "🌳"  // Tree for the main program
-	folderSymbol    = "📁"  // Folder
-	fileSymbol      = "📄"  // File
-	questionSymbol  = "❓"  // Question
-	successSymbol   = "✅"  // Success
-	errorSymbol     = "❌"  // Error
-	pathSymbol      = "🧭"  // Navigation/path
-	gitSymbol       = "🔄"  // Git
-	branchSymbol    = "🌿"  // Branch
-	constructSymbol = "🏗️" // Construction/creation
-	completeSymbol  = "🎉"  // Celebration/completion
-	warningSymbol   = "⚠️" // Warning
-	enterSymbol     = "➡️" // Input/enter
-	skipSymbol      = "⏭️" // Skip
-	returnSymbol    = "↩️" // Return
+	treeSymbol      = "🌳" // Tree for the main program (kept as emoji)
+	folderSymbol    = ""  // Folder (nerd font)
+	fileSymbol      = ""  // File (nerd font)
+	questionSymbol  = ""  // Question (nerd font)
+	successSymbol   = ""  // Success (nerd font)
+	errorSymbol     = ""  // Error (nerd font)
+	pathSymbol      = ""  // Navigation/path (nerd font)
+	gitSymbol       = ""  // Git (nerd font)
+	branchSymbol    = ""  // Branch (nerd font)
+	constructSymbol = ""  // Construction/creation (nerd font)
+	completeSymbol  = "🎉" // Celebration/completion (kept as emoji)
+	warningSymbol   = ""  // Warning (nerd font)
+	enterSymbol     = ""  // Input/enter (nerd font)
+	skipSymbol      = "ﭥ" // Skip (nerd font)
+	returnSymbol    = ""  // Return (nerd font)
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("\n%s %s TreeLadder - File Tree Creator %s\n\n", treeSymbol, colorGreen, colorReset)
+		fmt.Printf("%s %s TreeLadder - File Tree Creator %s\n", treeSymbol, colorGreen, colorReset)
 		repoName := args[2]
 		createRepo(repoName)
 	} else {
@@ -107,8 +107,7 @@ func createRepo(repoName string) {
 	displayCurrentPath()
 
 	// Ask if user wants to create files or folders
-	fmt.Printf("%s Would you like to create any files and/or folders?\n", questionSymbol)
-	fmt.Print("(y/n): ")
+	fmt.Printf("%s Would you like to create any files and/or folders?\n(y/n): ", questionSymbol)
 	response, _ := reader.ReadString('\n')
 
 	if !isAffirmative(response) {
@@ -126,8 +125,7 @@ func createRepo(repoName string) {
 	displayCurrentPath()
 
 	// Ask if user wants to initialize git repository
-	fmt.Printf("%s Would you like to initialize a git repository?\n", gitSymbol)
-	fmt.Print("(y/n): ")
+	fmt.Printf("%s Would you like to initialize a git repository?\n(y/n): ", gitSymbol)
 	response, _ = reader.ReadString('\n')
 
 	if isAffirmative(response) {
@@ -141,7 +139,7 @@ func createRepo(repoName string) {
 		}
 	}
 
-	fmt.Printf("\n%s Project structure created successfully! %s\n", completeSymbol, treeSymbol)
+	fmt.Printf("%s Project structure created successfully! %s\n", completeSymbol, treeSymbol)
 }
 
 func displayCurrentPath() {
@@ -154,15 +152,14 @@ func displayCurrentPath() {
 	// Get relative path for display
 	// dir := filepath.Base(currentDir)
 
-	fmt.Printf("\n%s %sCurrent path: %s%s\n\n", pathSymbol, colorCyan, currentDir, colorReset)
+	fmt.Printf("%s %sCurrent path: %s%s\n", pathSymbol, colorCyan, currentDir, colorReset)
 }
 
 func createFolders(reader *bufio.Reader, rootDir string) {
 	// Display current path
 	displayCurrentPath()
 
-	fmt.Printf("%s Would you like to create any folders?\n", folderSymbol)
-	fmt.Print("(y/n): ")
+	fmt.Printf("%s Would you like to create any folders?\n(y/n): ", folderSymbol)
 	response, _ := reader.ReadString('\n')
 
 	if !isAffirmative(response) {
@@ -206,8 +203,7 @@ func createFolders(reader *bufio.Reader, rootDir string) {
 		displayCurrentPath()
 
 		// Ask if user wants to create content inside this folder
-		fmt.Printf("%s Would you like to create content inside '%s%s%s'?\n", branchSymbol, colorGreen, name, colorReset)
-		fmt.Print("(y/n): ")
+		fmt.Printf("%s Would you like to create content inside '%s%s%s'?\n(y/n): ", branchSymbol, colorGreen, name, colorReset)
 		response, _ := reader.ReadString('\n')
 
 		if isAffirmative(response) {
@@ -241,8 +237,7 @@ func createFiles(reader *bufio.Reader) {
 	// Display current path
 	displayCurrentPath()
 
-	fmt.Printf("%s Would you like to create any files?\n", fileSymbol)
-	fmt.Print("(y/n): ")
+	fmt.Printf("%s Would you like to create any files?\n(y/n): ", fileSymbol)
 	response, _ := reader.ReadString('\n')
 
 	if !isAffirmative(response) {
