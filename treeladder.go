@@ -10,11 +10,41 @@ import (
 	"strings"
 )
 
+// ANSI color codes
+const (
+	colorReset  = "\033[0m"
+	colorGreen  = "\033[32m"
+	colorYellow = "\033[33m"
+	colorBlue   = "\033[34m"
+	colorCyan   = "\033[36m"
+	colorRed    = "\033[31m"
+	colorPurple = "\033[35m"
+)
+
+// Emojis and symbols
+const (
+	treeSymbol      = "🌳"  // Tree for the main program
+	folderSymbol    = "📁"  // Folder
+	fileSymbol      = "📄"  // File
+	questionSymbol  = "❓"  // Question
+	successSymbol   = "✅"  // Success
+	errorSymbol     = "❌"  // Error
+	pathSymbol      = "🧭"  // Navigation/path
+	gitSymbol       = "🔄"  // Git
+	branchSymbol    = "🌿"  // Branch
+	constructSymbol = "🏗️" // Construction/creation
+	completeSymbol  = "🎉"  // Celebration/completion
+	warningSymbol   = "⚠️" // Warning
+	enterSymbol     = "➡️" // Input/enter
+	skipSymbol      = "⏭️" // Skip
+	returnSymbol    = "↩️" // Return
+)
+
 func main() {
 	args := os.Args
 
 	if len(args) < 2 {
-		fmt.Println("Usage: treeladder create <repo_name>")
+		fmt.Printf("%s Usage: treeladder create <repo_name>\n", warningSymbol)
 		return
 	}
 
@@ -22,50 +52,67 @@ func main() {
 
 	if command == "create" {
 		if len(args) < 3 {
-			fmt.Println("Please provide a repository name")
+			fmt.Printf("%s Please provide a repository name\n", warningSymbol)
 			return
 		}
 
+		fmt.Printf("\n%s %s TreeLadder - File Tree Creator %s\n\n", treeSymbol, colorGreen, colorReset)
 		repoName := args[2]
 		createRepo(repoName)
 	} else {
-		fmt.Println("Unknown command. Use 'treeladder create <repo_name>'")
+		fmt.Printf("%s Unknown command. Use 'treeladder create <repo_name>'\n", warningSymbol)
 	}
+}
+
+// Helper function to check if response is affirmative
+func isAffirmative(response string) bool {
+	response = strings.TrimSpace(strings.ToLower(response))
+	return response == "yes" || response == "y"
+}
+
+// Helper function to check if response is negative
+func isNegative(response string) bool {
+	response = strings.TrimSpace(strings.ToLower(response))
+	return response == "no" || response == "n"
 }
 
 func createRepo(repoName string) {
 	// Create the root directory
+	fmt.Printf("%s Creating repository: %s%s%s\n", constructSymbol, colorCyan, repoName, colorReset)
 	err := os.Mkdir(repoName, 0o755)
 	if err != nil {
-		fmt.Printf("Error creating repository: %v\n", err)
+		fmt.Printf("%s Error creating repository: %v\n", errorSymbol, err)
 		return
 	}
 
-	fmt.Printf("Created repository: %s\n", repoName)
+	fmt.Printf("%s Repository created successfully\n", successSymbol)
 
 	// Change to the new directory
 	err = os.Chdir(repoName)
 	if err != nil {
-		fmt.Printf("Error changing to repository directory: %v\n", err)
+		fmt.Printf("%s Error changing to repository directory: %v\n", errorSymbol, err)
 		return
 	}
 
 	// Get the absolute path of the root directory
 	rootDir, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error getting current directory: %v\n", err)
+		fmt.Printf("%s Error getting current directory: %v\n", errorSymbol, err)
 		return
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 
-	// Ask if user wants to create files or folders
-	fmt.Print("Would you like to create any files and/or folders? (yes/no): ")
-	response, _ := reader.ReadString('\n')
-	response = strings.TrimSpace(strings.ToLower(response))
+	// Display current path
+	displayCurrentPath()
 
-	if response != "yes" && response != "y" {
-		fmt.Println("No files or folders created. Exiting.")
+	// Ask if user wants to create files or folders
+	fmt.Printf("%s Would you like to create any files and/or folders?\n", questionSymbol)
+	fmt.Print("(y/n): ")
+	response, _ := reader.ReadString('\n')
+
+	if !isAffirmative(response) {
+		fmt.Printf("%s No files or folders created. Exiting.\n", skipSymbol)
 		return
 	}
 
@@ -75,76 +122,100 @@ func createRepo(repoName string) {
 	// Create files at the root level
 	createFiles(reader)
 
-	// Ask if user wants to initialize git repository
-	fmt.Print("Would you like to initialize a git repository? (yes/no): ")
-	response, _ = reader.ReadString('\n')
-	response = strings.TrimSpace(strings.ToLower(response))
+	// Display current path
+	displayCurrentPath()
 
-	if response == "yes" || response == "y" {
+	// Ask if user wants to initialize git repository
+	fmt.Printf("%s Would you like to initialize a git repository?\n", gitSymbol)
+	fmt.Print("(y/n): ")
+	response, _ = reader.ReadString('\n')
+
+	if isAffirmative(response) {
+		fmt.Printf("%s Initializing git repository...\n", gitSymbol)
 		cmd := exec.Command("git", "init")
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			fmt.Printf("Error initializing git repository: %v\n", err)
+			fmt.Printf("%s Error initializing git repository: %v\n", errorSymbol, err)
 		} else {
-			fmt.Println(strings.TrimSpace(string(output)))
+			fmt.Printf("%s %s\n", successSymbol, strings.TrimSpace(string(output)))
 		}
 	}
 
-	fmt.Println("Project structure created successfully!")
+	fmt.Printf("\n%s Project structure created successfully! %s\n", completeSymbol, treeSymbol)
 }
 
-func createFolders(reader *bufio.Reader, rootDir string) {
-	fmt.Print("Would you like to create any folders? (yes/no): ")
-	response, _ := reader.ReadString('\n')
-	response = strings.TrimSpace(strings.ToLower(response))
-
-	if response != "yes" && response != "y" {
+func displayCurrentPath() {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("%s Error getting current directory: %v\n", errorSymbol, err)
 		return
 	}
 
-	fmt.Print("How many folders would you like to create? ")
+	// Get relative path for display
+	// dir := filepath.Base(currentDir)
+
+	fmt.Printf("\n%s %sCurrent path: %s%s\n\n", pathSymbol, colorCyan, currentDir, colorReset)
+}
+
+func createFolders(reader *bufio.Reader, rootDir string) {
+	// Display current path
+	displayCurrentPath()
+
+	fmt.Printf("%s Would you like to create any folders?\n", folderSymbol)
+	fmt.Print("(y/n): ")
+	response, _ := reader.ReadString('\n')
+
+	if !isAffirmative(response) {
+		return
+	}
+
+	fmt.Printf("%s How many folders would you like to create? ", folderSymbol)
 	countStr, _ := reader.ReadString('\n')
 	countStr = strings.TrimSpace(countStr)
 	count, err := strconv.Atoi(countStr)
 	if err != nil || count < 1 {
-		fmt.Println("Invalid number of folders. Skipping.")
+		fmt.Printf("%s Invalid number of folders. Skipping.\n", warningSymbol)
 		return
 	}
 
 	// Store current working directory
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error getting current directory: %v\n", err)
+		fmt.Printf("%s Error getting current directory: %v\n", errorSymbol, err)
 		return
 	}
 
 	for i := 1; i <= count; i++ {
-		fmt.Printf("Enter name for folder %d: ", i)
+		fmt.Printf("%s Enter name for folder %d: ", enterSymbol, i)
 		name, _ := reader.ReadString('\n')
 		name = strings.TrimSpace(name)
 
 		if name == "" {
-			fmt.Printf("Empty name provided for folder %d. Skipping.\n", i)
+			fmt.Printf("%s Empty name provided for folder %d. Skipping.\n", skipSymbol, i)
 			continue
 		}
 
 		err = os.Mkdir(name, 0o755)
 		if err != nil {
-			fmt.Printf("Error creating folder '%s': %v\n", name, err)
+			fmt.Printf("%s Error creating folder '%s': %v\n", errorSymbol, name, err)
 			continue
 		}
-		fmt.Printf("Created folder: %s\n", name)
+		fmt.Printf("%s %sCreated folder: %s%s\n", successSymbol, colorGreen, name, colorReset)
+
+		// Display current path
+		displayCurrentPath()
 
 		// Ask if user wants to create content inside this folder
-		fmt.Printf("Would you like to create content inside '%s'? (yes/no): ", name)
+		fmt.Printf("%s Would you like to create content inside '%s%s%s'?\n", branchSymbol, colorGreen, name, colorReset)
+		fmt.Print("(y/n): ")
 		response, _ := reader.ReadString('\n')
-		response = strings.TrimSpace(strings.ToLower(response))
 
-		if response == "yes" || response == "y" {
+		if isAffirmative(response) {
 			// Change to the new folder
+			fmt.Printf("%s Entering folder: %s%s%s\n", enterSymbol, colorGreen, name, colorReset)
 			err = os.Chdir(name)
 			if err != nil {
-				fmt.Printf("Error changing to directory '%s': %v\n", name, err)
+				fmt.Printf("%s Error changing to directory '%s': %v\n", errorSymbol, name, err)
 				continue
 			}
 
@@ -155,9 +226,10 @@ func createFolders(reader *bufio.Reader, rootDir string) {
 			createFiles(reader)
 
 			// Return to the parent directory
+			fmt.Printf("%s Returning to parent folder\n", returnSymbol)
 			err = os.Chdir(currentDir)
 			if err != nil {
-				fmt.Printf("Error returning to parent directory: %v\n", err)
+				fmt.Printf("%s Error returning to parent directory: %v\n", errorSymbol, err)
 				// Try to force return to root directory
 				os.Chdir(rootDir)
 			}
@@ -166,40 +238,43 @@ func createFolders(reader *bufio.Reader, rootDir string) {
 }
 
 func createFiles(reader *bufio.Reader) {
-	fmt.Print("Would you like to create any files? (yes/no): ")
-	response, _ := reader.ReadString('\n')
-	response = strings.TrimSpace(strings.ToLower(response))
+	// Display current path
+	displayCurrentPath()
 
-	if response != "yes" && response != "y" {
+	fmt.Printf("%s Would you like to create any files?\n", fileSymbol)
+	fmt.Print("(y/n): ")
+	response, _ := reader.ReadString('\n')
+
+	if !isAffirmative(response) {
 		return
 	}
 
-	fmt.Print("How many files would you like to create? ")
+	fmt.Printf("%s How many files would you like to create? ", fileSymbol)
 	countStr, _ := reader.ReadString('\n')
 	countStr = strings.TrimSpace(countStr)
 	count, err := strconv.Atoi(countStr)
 	if err != nil || count < 1 {
-		fmt.Println("Invalid number of files. Skipping.")
+		fmt.Printf("%s Invalid number of files. Skipping.\n", warningSymbol)
 		return
 	}
 
 	for i := 1; i <= count; i++ {
-		fmt.Printf("Enter name for file %d: ", i)
+		fmt.Printf("%s Enter name for file %d: ", enterSymbol, i)
 		name, _ := reader.ReadString('\n')
 		name = strings.TrimSpace(name)
 
 		if name == "" {
-			fmt.Printf("Empty name provided for file %d. Skipping.\n", i)
+			fmt.Printf("%s Empty name provided for file %d. Skipping.\n", skipSymbol, i)
 			continue
 		}
 
 		// Create an empty file
 		file, err := os.Create(name)
 		if err != nil {
-			fmt.Printf("Error creating file '%s': %v\n", name, err)
+			fmt.Printf("%s Error creating file '%s': %v\n", errorSymbol, name, err)
 		} else {
 			file.Close()
-			fmt.Printf("Created file: %s\n", name)
+			fmt.Printf("%s %sCreated file: %s%s\n", successSymbol, colorYellow, name, colorReset)
 		}
 	}
 }
