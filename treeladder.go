@@ -21,23 +21,23 @@ const (
 	colorPurple = "\033[35m"
 )
 
-// Symbols - using Nerd Font symbols and keeping tree emoji
+// Symbols - using actual Nerd Font icons and keeping tree emoji
 const (
-	treeSymbol      = "🌳" // Tree for the main program (kept as emoji)
-	folderSymbol    = ""  // Folder (nerd font)
-	fileSymbol      = ""  // File (nerd font)
-	questionSymbol  = ""  // Question (nerd font)
-	successSymbol   = ""  // Success (nerd font)
-	errorSymbol     = ""  // Error (nerd font)
-	pathSymbol      = ""  // Navigation/path (nerd font)
-	gitSymbol       = ""  // Git (nerd font)
-	branchSymbol    = ""  // Branch (nerd font)
-	constructSymbol = ""  // Construction/creation (nerd font)
-	completeSymbol  = "🎉" // Celebration/completion (kept as emoji)
-	warningSymbol   = ""  // Warning (nerd font)
-	enterSymbol     = ""  // Input/enter (nerd font)
-	skipSymbol      = "ﭥ" // Skip (nerd font)
-	returnSymbol    = ""  // Return (nerd font)
+	treeSymbol      = "🌳"      // Tree for the main program (kept as emoji)
+	folderSymbol    = "\uf07b" // Folder nerd font icon
+	fileSymbol      = "\uf15b" // File nerd font icon
+	questionSymbol  = "\uf059" // Question nerd font icon
+	successSymbol   = "\uf00c" // Success/check nerd font icon
+	errorSymbol     = "\uf00d" // Error/x nerd font icon
+	pathSymbol      = "\uf07c" // Open folder/path nerd font icon
+	gitSymbol       = "\uf1d3" // Git nerd font icon
+	branchSymbol    = "\ue725" // Branch nerd font icon
+	constructSymbol = "\uf085" // Cog/construction nerd font icon
+	completeSymbol  = "🎉"      // Celebration/completion (kept as emoji)
+	warningSymbol   = "\uf071" // Warning nerd font icon
+	enterSymbol     = "\uf054" // Right arrow/enter nerd font icon
+	skipSymbol      = "\uf05e" // Skip/prohibited nerd font icon
+	returnSymbol    = "\uf112" // Return arrow nerd font icon
 )
 
 func main() {
