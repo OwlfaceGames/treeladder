@@ -56,7 +56,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("%s %s TreeLadder - File Tree Creator %s\n", treeSymbol, colorGreen, colorReset)
+		fmt.Printf("%s %s TreeLadder%s\n", treeSymbol, colorGreen, colorReset)
 		repoName := args[2]
 		createRepo(repoName)
 	} else {
