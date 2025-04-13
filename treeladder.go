@@ -23,7 +23,7 @@ const (
 
 // Symbols - using actual Nerd Font icons and keeping tree emoji
 const (
-	treeSymbol      = "🌳"      // Tree for the main program (kept as emoji)
+	treeSymbol      = "🌳🪜"     // Tree for the main program (kept as emoji)
 	folderSymbol    = "\uf07b" // Folder nerd font icon
 	fileSymbol      = "\uf15b" // File nerd font icon
 	questionSymbol  = "\uf059" // Question nerd font icon
@@ -56,7 +56,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("%s %s TreeLadder%s\n", treeSymbol, colorGreen, colorReset)
+		fmt.Printf("%s %sTreeLadder%s\n", treeSymbol, colorGreen, colorReset)
 		repoName := args[2]
 		createRepo(repoName)
 	} else {
@@ -139,7 +139,7 @@ func createRepo(repoName string) {
 		}
 	}
 
-	fmt.Printf("%s Project structure created successfully! %s\n", completeSymbol, treeSymbol)
+	fmt.Printf("%s Project structure created successfully! %s\n", treeSymbol, completeSymbol)
 }
 
 func displayCurrentPath() {
