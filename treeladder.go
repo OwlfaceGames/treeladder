@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	// "path/filepath"
 	"strconv"
 	"strings"
 )
@@ -38,6 +37,14 @@ const (
 	enterSymbol     = "\uf054" // Right arrow/enter nerd font icon
 	skipSymbol      = "\uf05e" // Skip/prohibited nerd font icon
 	returnSymbol    = "\uf112" // Return arrow nerd font icon
+	tmuxSymbol      = "\uf120" // Terminal symbol for tmux
+)
+
+// Version information - will be set during build
+var (
+	Version   = "dev"
+	BuildDate = "unknown"
+	GitCommit = "unknown"
 )
 
 func main() {
@@ -49,6 +56,13 @@ func main() {
 	}
 
 	command := args[1]
+
+	if command == "version" || command == "--version" || command == "-v" {
+		fmt.Printf("%s TreeLadder %s\n", treeSymbol, Version)
+		fmt.Printf("Build date: %s\n", BuildDate)
+		fmt.Printf("Git commit: %s\n", GitCommit)
+		return
+	}
 
 	if command == "create" {
 		if len(args) < 3 {
@@ -70,10 +84,10 @@ func isAffirmative(response string) bool {
 	return response == "yes" || response == "y"
 }
 
-// Helper function to check if response is negative
-func isNegative(response string) bool {
-	response = strings.TrimSpace(strings.ToLower(response))
-	return response == "no" || response == "n"
+// Helper function to check if a command exists
+func commandExists(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
 }
 
 func createRepo(repoName string) {
@@ -139,6 +153,17 @@ func createRepo(repoName string) {
 		}
 	}
 
+	// Check if tmux is installed
+	if commandExists("tmux") {
+		// Ask if user wants to create a tmux session
+		fmt.Printf("%s Would you like to create a tmux session for this project?\n(y/n): ", tmuxSymbol)
+		response, _ = reader.ReadString('\n')
+
+		if isAffirmative(response) {
+			createTmuxSession(repoName, rootDir)
+		}
+	}
+
 	fmt.Printf("%s Project structure created successfully! %s\n", treeSymbol, completeSymbol)
 }
 
@@ -148,9 +173,6 @@ func displayCurrentPath() {
 		fmt.Printf("%s Error getting current directory: %v\n", errorSymbol, err)
 		return
 	}
-
-	// Get relative path for display
-	// dir := filepath.Base(currentDir)
 
 	fmt.Printf("%s %sCurrent path: %s%s\n", pathSymbol, colorCyan, currentDir, colorReset)
 }
@@ -272,4 +294,88 @@ func createFiles(reader *bufio.Reader) {
 			fmt.Printf("%s %sCreated file: %s%s\n", successSymbol, colorYellow, name, colorReset)
 		}
 	}
+}
+
+func createTmuxSession(projectName string, projectPath string) {
+	fmt.Printf("%s Creating tmux session for project: %s%s%s\n", tmuxSymbol, colorGreen, projectName, colorReset)
+
+	// Sanitize project name for tmux session name (remove spaces and special characters)
+	sessionName := strings.ReplaceAll(projectName, " ", "_")
+	sessionName = strings.ReplaceAll(sessionName, ".", "_")
+
+	// Check if session already exists
+	checkCmd := exec.Command("tmux", "has-session", "-t", sessionName)
+	err := checkCmd.Run()
+
+	if err == nil {
+		fmt.Printf("%s Session '%s' already exists. Attaching...\n", warningSymbol, sessionName)
+		attachCmd := exec.Command("tmux", "attach-session", "-t", sessionName)
+		attachCmd.Stdin = os.Stdin
+		attachCmd.Stdout = os.Stdout
+		attachCmd.Stderr = os.Stderr
+		attachCmd.Run()
+		return
+	}
+
+	// Create a new session with the first window named "code"
+	newSessionCmd := exec.Command("tmux", "new-session", "-s", sessionName, "-n", "code", "-d")
+	err = newSessionCmd.Run()
+	if err != nil {
+		fmt.Printf("%s Error creating tmux session: %v\n", errorSymbol, err)
+		return
+	}
+
+	// Change to the project directory in the first pane
+	sendKeysCmd := exec.Command("tmux", "send-keys", "-t", sessionName+":code", "cd "+projectPath, "C-m")
+	sendKeysCmd.Run()
+
+	// Ask if user wants to open an editor
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("%s Would you like to open an editor in the first pane? (vim/nvim/code/none)\n(vim/nvim/code/none): ", questionSymbol)
+	editorResponse, _ := reader.ReadString('\n')
+	editorResponse = strings.TrimSpace(strings.ToLower(editorResponse))
+
+	// Open the chosen editor
+	if editorResponse == "vim" || editorResponse == "nvim" || editorResponse == "code" {
+		sendKeysCmd = exec.Command("tmux", "send-keys", "-t", sessionName+":code", editorResponse, "C-m")
+		sendKeysCmd.Run()
+	}
+
+	// Split the window vertically
+	splitCmd := exec.Command("tmux", "split-window", "-h", "-t", sessionName+":code")
+	splitCmd.Run()
+
+	// Change to the project directory in the right pane
+	sendKeysCmd = exec.Command("tmux", "send-keys", "-t", sessionName+":code.2", "cd "+projectPath, "C-m")
+	sendKeysCmd.Run()
+
+	// Create a second window named "term"
+	newWindowCmd := exec.Command("tmux", "new-window", "-t", sessionName, "-n", "term")
+	newWindowCmd.Run()
+
+	// Change to the project directory in the term window
+	sendKeysCmd = exec.Command("tmux", "send-keys", "-t", sessionName+":term", "cd "+projectPath, "C-m")
+	sendKeysCmd.Run()
+
+	// Create a third window named "other"
+	newWindowCmd = exec.Command("tmux", "new-window", "-t", sessionName, "-n", "other")
+	newWindowCmd.Run()
+
+	// Stay at home directory for the "other" window
+	homeDir, _ := os.UserHomeDir()
+	sendKeysCmd = exec.Command("tmux", "send-keys", "-t", sessionName+":other", "cd "+homeDir, "C-m")
+	sendKeysCmd.Run()
+
+	// Select the first window
+	selectWindowCmd := exec.Command("tmux", "select-window", "-t", sessionName+":code")
+	selectWindowCmd.Run()
+
+	fmt.Printf("%s Tmux session '%s' created. Attaching...\n", successSymbol, sessionName)
+
+	// Attach to the session
+	attachCmd := exec.Command("tmux", "attach-session", "-t", sessionName)
+	attachCmd.Stdin = os.Stdin
+	attachCmd.Stdout = os.Stdout
+	attachCmd.Stderr = os.Stderr
+	attachCmd.Run()
 }
