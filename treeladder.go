@@ -329,18 +329,6 @@ func createTmuxSession(projectName string, projectPath string) {
 	sendKeysCmd := exec.Command("tmux", "send-keys", "-t", sessionName+":code", "cd "+projectPath, "C-m")
 	sendKeysCmd.Run()
 
-	// Ask if user wants to open an editor
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("%s Would you like to open an editor in the first pane? (vim/nvim/code/none)\n(vim/nvim/code/none): ", questionSymbol)
-	editorResponse, _ := reader.ReadString('\n')
-	editorResponse = strings.TrimSpace(strings.ToLower(editorResponse))
-
-	// Open the chosen editor
-	if editorResponse == "vim" || editorResponse == "nvim" || editorResponse == "code" {
-		sendKeysCmd = exec.Command("tmux", "send-keys", "-t", sessionName+":code", editorResponse, "C-m")
-		sendKeysCmd.Run()
-	}
-
 	// Split the window vertically
 	splitCmd := exec.Command("tmux", "split-window", "-h", "-t", sessionName+":code")
 	splitCmd.Run()
@@ -349,6 +337,17 @@ func createTmuxSession(projectName string, projectPath string) {
 	sendKeysCmd = exec.Command("tmux", "send-keys", "-t", sessionName+":code.2", "cd "+projectPath, "C-m")
 	sendKeysCmd.Run()
 
+	// Ask if user wants to open an editor
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("%s Would you like to open an editor in the second pane? (vim/nvim/code/none)\n(vim/nvim/code/none): ", questionSymbol)
+	editorResponse, _ := reader.ReadString('\n')
+	editorResponse = strings.TrimSpace(strings.ToLower(editorResponse))
+
+	// Open the chosen editor
+	if editorResponse == "vim" || editorResponse == "nvim" || editorResponse == "code" {
+		sendKeysCmd = exec.Command("tmux", "send-keys", "-t", sessionName+":code", editorResponse, "C-m")
+		sendKeysCmd.Run()
+	}
 	// Create a second window named "term"
 	newWindowCmd := exec.Command("tmux", "new-window", "-t", sessionName, "-n", "term")
 	newWindowCmd.Run()
