@@ -15,12 +15,4 @@ TreeLadder is a command-line tool written in Go that helps developers quickly cr
 * **From source**:
   * Clone the repository: `git clone https://github.com/owlfacegames/treeladder.git`
   * Build the binary: `cd treeladder && go build`
-  * Move to a directory in your PATH: `mv treeladder /usr/local/bin/`
-
-* **Using Go install**:
-  * Run: `go install github.com/yourusername/treeladder@latest`
-
-* **Pre-built binaries**:
-  * Download the appropriate binary for your platform from the releases page
-  * Extract the archive
-  * Move the binary to a location in your PATH
+  * Move to a directory in your PATH: `mv treeladder /usr/local/bin/` or just do go install from project root
