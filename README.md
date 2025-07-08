@@ -1,6 +1,7 @@
 # TreeLadder
 
 TreeLadder is a command-line tool written in Go that helps developers quickly create file and directory structures for new projects. It provides an interactive interface to create nested folders and files, allowing you to scaffold project structures with minimal effort. The tool guides you through the creation process step by step, making it easy to build complex directory hierarchies without having to manually create each folder and file.
+![](treeladder.gif)
 
 ## Usage
 
